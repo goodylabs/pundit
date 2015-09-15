@@ -34,8 +34,8 @@ module Pundit
   extend ActiveSupport::Concern
 
   class << self
-    def authorize(user, record, query)
-      policy = policy!(user, record)
+    def authorize(user, record, query, namespace)
+      policy = policy!(user, record, namespace)
 
       unless policy.public_send(query)
         raise NotAuthorizedError.new(query: query, record: record, policy: policy)
@@ -109,12 +109,12 @@ module Pundit
     raise PolicyScopingNotPerformedError unless pundit_policy_scoped?
   end
 
-  def authorize(record, query=nil)
+  def authorize(record, namespace = Object, query = nil)
     query ||= params[:action].to_s + "?"
 
     @_pundit_policy_authorized = true
 
-    policy = policy(record)
+    policy = policy(record, namespace)
     unless policy.public_send(query)
       raise NotAuthorizedError.new(query: query, record: record, policy: policy)
     end
@@ -135,8 +135,8 @@ module Pundit
     pundit_policy_scope(scope)
   end
 
-  def policy(record)
-    policies[record] ||= Pundit.policy!(pundit_user, record)
+  def policy(record, namespace = Object)
+    policies[record] ||= Pundit.policy!(pundit_user, record, namespace)
   end
 
   def permitted_attributes(record)
