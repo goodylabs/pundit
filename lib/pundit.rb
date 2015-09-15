@@ -44,22 +44,22 @@ module Pundit
       true
     end
 
-    def policy_scope(user, scope)
-      policy_scope = PolicyFinder.new(scope).scope
+    def policy_scope(user, scope, namespace = Object)
+      policy_scope = PolicyFinder.new(scope, namespace).scope
       policy_scope.new(user, scope).resolve if policy_scope
     end
 
-    def policy_scope!(user, scope)
-      PolicyFinder.new(scope).scope!.new(user, scope).resolve
+    def policy_scope!(user, scope, namespace = Object)
+      PolicyFinder.new(scope, namespace).scope!.new(user, scope).resolve
     end
 
-    def policy(user, record)
-      policy = PolicyFinder.new(record).policy
+    def policy(user, record, namespace = Object)
+      policy = PolicyFinder.new(record, namespace).policy
       policy.new(user, record) if policy
     end
 
-    def policy!(user, record)
-      PolicyFinder.new(record).policy!.new(user, record)
+    def policy!(user, record, namespace = Object)
+      PolicyFinder.new(record, namespace).policy!.new(user, record)
     end
   end
 
@@ -159,6 +159,6 @@ module Pundit
 private
 
   def pundit_policy_scope(scope)
-    policy_scopes[scope] ||= Pundit.policy_scope!(pundit_user, scope)
+    policy_scopes[scope] ||= Pundit.policy_scope!(pundit_user, scope, self.class.parent)
   end
 end
